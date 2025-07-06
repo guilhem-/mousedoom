@@ -3,9 +3,36 @@ const { createApp, ref, onMounted } = Vue;
 createApp({
   setup() {
     const canvas = ref(null);
+    const count = ref(0);
     let ctx;
     let currentPath = [];
     const pointers = [];
+
+    function fetchRecords() {
+      fetch('/records')
+        .then(r => r.json())
+        .then(json => {
+          if (Array.isArray(json.records)) {
+            json.records.forEach(rec => {
+              pointers.push({ path: rec, start: Date.now(), color: colorFor(pointers.length) });
+            });
+            while (pointers.length > 100) pointers.shift();
+            updateCount();
+          }
+        })
+        .catch(() => { });
+    }
+
+    function clearAll() {
+      fetch('/records', { method: 'DELETE' }).catch(() => { });
+      pointers.length = 0;
+      currentPath = [];
+      updateCount();
+    }
+
+    function updateCount() {
+      count.value = pointers.length;
+    }
 
     function record(e) {
       const rect = canvas.value.getBoundingClientRect();
@@ -18,6 +45,17 @@ createApp({
       const base = 255 - Math.min(index, 50) * 5; // about 2%
       const c = Math.max(0, base);
       return `rgb(${c},${c},${c})`;
+    }
+
+    function drawPointer(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 10, y + 4);
+      ctx.lineTo(x + 4, y + 6);
+      ctx.lineTo(x + 6, y + 14);
+      ctx.closePath();
+      ctx.fill();
     }
 
     function sendRecords() {
@@ -34,12 +72,14 @@ createApp({
               pointers.push({ path: rec, start: Date.now(), color: colorFor(pointers.length) });
             });
             while (pointers.length > 100) pointers.shift();
+            updateCount();
           }
         })
         .catch(() => { });
 
       pointers.push({ path: currentPath, start: Date.now(), color: colorFor(pointers.length) });
       while (pointers.length > 100) pointers.shift();
+      updateCount();
       currentPath = [];
     }
 
@@ -59,10 +99,7 @@ createApp({
             break;
           }
         }
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(canvas.value.width / 2 + pos.x, canvas.value.height / 2 + pos.y, 5, 0, Math.PI * 2);
-        ctx.fill();
+        drawPointer(canvas.value.width / 2 + pos.x, canvas.value.height / 2 + pos.y, p.color);
       }
       requestAnimationFrame(draw);
     }
@@ -74,9 +111,10 @@ createApp({
       ctx = c.getContext('2d');
       c.addEventListener('mousemove', record);
       setInterval(sendRecords, 15000);
+      fetchRecords();
       draw();
     });
 
-    return { canvas };
+    return { canvas, count, clear: clearAll };
   }
 }).mount('#app');

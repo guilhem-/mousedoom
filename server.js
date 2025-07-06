@@ -26,6 +26,10 @@ const server = http.createServer((req, res) => {
     if (req.url === '/vue.js') {
       return sendFile(res, 'vue.js', 'application/javascript');
     }
+    if (req.url === '/records') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ records }));
+    }
     return sendFile(res, 'index.html', 'text/html');
   }
 
@@ -47,6 +51,13 @@ const server = http.createServer((req, res) => {
         res.end('Bad request');
       }
     });
+    return;
+  }
+
+  if (req.method === 'DELETE' && req.url === '/records') {
+    records = [];
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ records }));
     return;
   }
 
