@@ -6,11 +6,16 @@
 <style>
 body { margin: 0; }
 canvas { width: 100%; height: calc(100vh - 40px); background: black; display: block; }
-h1 { text-align: center; }
+h1 { text-align: center; position: relative; }
+#overlay { position: absolute; right: 10px; top: 0; height: 40px; display: flex; align-items: center; gap: 10px; }
 </style>
 </head>
 <body>
 <h1>Mouse mermory doom</h1>
+<div id="overlay">
+  <span>{{ count }}</span>
+  <button @click="clear">Clear</button>
+</div>
 <div id="app">
   <canvas></canvas>
 </div>
