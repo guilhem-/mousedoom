@@ -5,8 +5,17 @@ createApp({
     const canvas = ref(null);
     const count = ref(0);
     let ctx;
+    let shadow;
     let currentPath = [];
     const pointers = [];
+
+    function createCursor(color) {
+      const el = document.createElement('div');
+      el.className = 'cursor';
+      el.style.background = color;
+      document.body.appendChild(el);
+      return el;
+    }
 
     function fetchRecords() {
       fetch('/records')
@@ -14,9 +23,13 @@ createApp({
         .then(json => {
           if (Array.isArray(json.records)) {
             json.records.forEach(rec => {
-              pointers.push({ path: rec, start: Date.now(), color: colorFor(pointers.length) });
+              const color = colorFor(pointers.length);
+              pointers.push({ path: rec, start: Date.now(), color, elem: createCursor(color), trail: [] });
             });
-            while (pointers.length > 100) pointers.shift();
+            while (pointers.length > 100) {
+              const old = pointers.shift();
+              if (old.elem) document.body.removeChild(old.elem);
+            }
             updateCount();
           }
         })
@@ -25,7 +38,10 @@ createApp({
 
     function clearAll() {
       fetch('/records', { method: 'DELETE' }).catch(() => { });
-      pointers.length = 0;
+      while (pointers.length) {
+        const p = pointers.pop();
+        if (p.elem) document.body.removeChild(p.elem);
+      }
       currentPath = [];
       updateCount();
     }
@@ -47,16 +63,6 @@ createApp({
       return `rgb(${c},${c},${c})`;
     }
 
-    function drawPointer(x, y, color) {
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + 10, y + 4);
-      ctx.lineTo(x + 4, y + 6);
-      ctx.lineTo(x + 6, y + 14);
-      ctx.closePath();
-      ctx.fill();
-    }
 
     function sendRecords() {
       if (currentPath.length === 0) return;
@@ -69,7 +75,8 @@ createApp({
         .then(json => {
           if (Array.isArray(json.records)) {
             json.records.forEach(rec => {
-              pointers.push({ path: rec, start: Date.now(), color: colorFor(pointers.length) });
+              const color = colorFor(pointers.length);
+              pointers.push({ path: rec, start: Date.now(), color, elem: createCursor(color), trail: [] });
             });
             while (pointers.length > 100) pointers.shift();
             updateCount();
@@ -77,8 +84,12 @@ createApp({
         })
         .catch(() => { });
 
-      pointers.push({ path: currentPath, start: Date.now(), color: colorFor(pointers.length) });
-      while (pointers.length > 100) pointers.shift();
+      const color = colorFor(pointers.length);
+      pointers.push({ path: currentPath, start: Date.now(), color, elem: createCursor(color), trail: [] });
+      while (pointers.length > 100) {
+        const old = pointers.shift();
+        if (old.elem) document.body.removeChild(old.elem);
+      }
       updateCount();
       currentPath = [];
     }
@@ -99,7 +110,20 @@ createApp({
             break;
           }
         }
-        drawPointer(canvas.value.width / 2 + pos.x, canvas.value.height / 2 + pos.y, p.color);
+        const x = canvas.value.width / 2 + pos.x;
+        const y = canvas.value.height / 2 + pos.y;
+        p.elem.style.left = x + 'px';
+        p.elem.style.top = y + 'px';
+        p.trail.push({ x, y, t: now });
+        while (p.trail.length && now - p.trail[0].t > 1000) p.trail.shift();
+        ctx.strokeStyle = p.color;
+        ctx.beginPath();
+        for (let j = 0; j < p.trail.length; j++) {
+          const pt = p.trail[j];
+          if (j === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.stroke();
       }
       requestAnimationFrame(draw);
     }
@@ -109,6 +133,11 @@ createApp({
       c.width = c.clientWidth;
       c.height = c.clientHeight;
       ctx = c.getContext('2d');
+      shadow = document.getElementById('shadow');
+      document.addEventListener('mousemove', e => {
+        shadow.style.left = e.clientX + 'px';
+        shadow.style.top = e.clientY + 'px';
+      });
       c.addEventListener('mousemove', record);
       setInterval(sendRecords, 15000);
       fetchRecords();
