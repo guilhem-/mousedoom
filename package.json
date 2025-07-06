@@ -1,0 +1,22 @@
+{
+  "name": "mousedoom",
+  "version": "1.0.0",
+  "description": "a basic experiment with mouse and js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/server.js && node test/client.js",
+    "build": "node build.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "GPL-3.0",
+  "type": "commonjs",
+  "dependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "terser": "^5.29.0",
+    "html-minifier-terser": "^7.0.0"
+  }
+}
