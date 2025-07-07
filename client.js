@@ -6,6 +6,7 @@ createApp({
     const count = ref(0);
     let ctx;
     let shadow;
+    let countEl;
     let currentPath = [];
     const pointers = [];
 
@@ -48,6 +49,7 @@ createApp({
 
     function updateCount() {
       count.value = pointers.length;
+      if (countEl) countEl.textContent = String(count.value);
     }
 
     function record(e) {
@@ -134,6 +136,7 @@ createApp({
       c.height = c.clientHeight;
       ctx = c.getContext('2d');
       shadow = document.getElementById('shadow');
+      countEl = document.getElementById('counter');
       document.addEventListener('mousemove', e => {
         shadow.style.left = e.clientX + 'px';
         shadow.style.top = e.clientY + 'px';
@@ -141,6 +144,7 @@ createApp({
       c.addEventListener('mousemove', record);
       setInterval(sendRecords, 15000);
       fetchRecords();
+      updateCount();
       draw();
     });
 

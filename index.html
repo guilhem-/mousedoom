@@ -4,31 +4,19 @@
 <meta charset="UTF-8">
 <title>Mouse memory doom</title>
 <style>
-body { margin: 0; }
+body { margin: 0; cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAIUlEQVR4nGNgYGD4D8UUgVFDRg0h1hCKwX8ceNQASg0AAApgNsqHumswAAAAAElFTkSuQmCC") 0 0, auto; }
 canvas { width: 100%; height: calc(100vh - 40px); background: black; display: block; }
 h1 { text-align: center; position: relative; }
 #overlay { position: absolute; right: 10px; top: 0; height: 40px; display: flex; align-items: center; gap: 10px; }
-#shadow {
-  position: fixed;
-  left: 0; top: 0;
-  width: 32px; height: 32px; /* big enough for any cursor */
-  pointer-events: none; /* let clicks go through */
-  z-index: 9999;
-}
-.cursor {
-  position: fixed;
-  left: 0; top: 0;
-  width: 32px; height: 32px;
-  pointer-events: none;
-  z-index: 9999;
-}
+#shadow { position: fixed; left: 0; top: 0; width: 16px; height: 16px; pointer-events: none; z-index: 9999; background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAIUlEQVR4nGNgYGD4D8UUgVFDRg0h1hCKwX8ceNQASg0AAApgNsqHumswAAAAAElFTkSuQmCC") no-repeat; }
+.cursor { position: fixed; left: 0; top: 0; width: 16px; height: 16px; pointer-events: none; z-index: 9999; }
 </style>
 </head>
 <body>
 <h1>Mouse mermory doom</h1>
 <div id="app">
   <div id="overlay">
-    <span>{{ count }}</span>
+    <span id="counter"></span>
     <button @click="clear">Clear</button>
   </div>
   <canvas></canvas>
@@ -44,6 +32,7 @@ createApp({
     const count = ref(0);
     let ctx;
     let shadow;
+    let countEl;
     let currentPath = [];
     const pointers = [];
 
@@ -86,6 +75,7 @@ createApp({
 
     function updateCount() {
       count.value = pointers.length;
+      if (countEl) countEl.textContent = String(count.value);
     }
 
     function record(e) {
@@ -171,6 +161,7 @@ createApp({
       c.height = c.clientHeight;
       ctx = c.getContext('2d');
       shadow = document.getElementById('shadow');
+      countEl = document.getElementById('counter');
       document.addEventListener('mousemove', e => {
         shadow.style.left = e.clientX + 'px';
         shadow.style.top = e.clientY + 'px';
@@ -178,6 +169,7 @@ createApp({
       c.addEventListener('mousemove', record);
       setInterval(sendRecords, 15000);
       fetchRecords();
+      updateCount();
       draw();
     });
 
