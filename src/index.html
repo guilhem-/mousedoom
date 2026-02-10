@@ -3,30 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <title>Mouse memory doom</title>
-<style>
-body {
-  margin: 0;
-  cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAIUlEQVR4nGNgYGD4D8UUgVFDRg0h1hCKwX8ceNQASg0AAApgNsqHumswAAAAAElFTkSuQmCC") 0 0, auto;
-}
-canvas { width: 100%; height: calc(100vh - 40px); background: black; display: block; }
-h1 { text-align: center; position: relative; }
-#overlay { position: absolute; right: 10px; top: 0; height: 40px; display: flex; align-items: center; gap: 10px; }
-#shadow {
-  position: fixed;
-  left: 0; top: 0;
-  width: 16px; height: 16px;
-  pointer-events: none; /* let clicks go through */
-  z-index: 9999;
-  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAIUlEQVR4nGNgYGD4D8UUgVFDRg0h1hCKwX8ceNQASg0AAApgNsqHumswAAAAAElFTkSuQmCC") no-repeat;
-}
-.cursor {
-  position: fixed;
-  left: 0; top: 0;
-  width: 16px; height: 16px;
-  pointer-events: none;
-  z-index: 9999;
-}
-</style>
+      <style>body {
+         margin: 0;
+         cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAMAAAGzeb2oAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADJUExURYmJiQAAAH19fSQkJD4+PtXV1WNjY3x8fC4uLvLy8uzs7FtbW3t7e+3t7f///+rq6lxcXHp6euvr611dXXl5eS8vL15eXu7u7mhoaO/v7+np6ejo6NLS0j09PXV1dbm5uQQEBDk5OTc3NzY2NkpKShMTE6qqqmdnZwEBAeXl5ZiYmC0tLfHx8XZ2dmRkZKamptvb2x4eHtra2m5ubm9vb01NTfT09CgoKEtLSz8/P8PDw8jIyHBwcP39/dHR0RAQEDg4OHR0dAAAAGkfIhoAAABDdFJOU////////////////////////////////////////////////////////////////////////////////////////wBBYgTvAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGHRFWHRTb2Z0d2FyZQBQYWludC5ORVQgNS4xLjgbaeqoAAAAtmVYSWZJSSoACAAAAAUAGgEFAAEAAABKAAAAGwEFAAEAAABSAAAAKAEDAAEAAAADAAAAMQECABAAAABaAAAAaYcEAAEAAABqAAAAAAAAAKOTAADoAwAAo5MAAOgDAABQYWludC5ORVQgNS4xLjgAAwAAkAcABAAAADAyMzABoAMAAQAAAAEAAAAFoAQAAQAAAJQAAAAAAAAAAgABAAIABAAAAFI5OAACAAcABAAAADAxMDAAAAAAuh84Q/mMLokAAADaSURBVBhXVY/pUgIxEIQbRV2FbTBkUcT1WA9UWE+8737/h7ImmxSSH5OvvslUTwAh8ygqSKCwJWRdCQXp8SwKkkxb21mhsyJh/loKqyvWl5Cxtx2gIOl8hL3x/gGms/rm1lpdSb8GzYyEdoLNToSc/QQcJOAwgZHBaJyXBud5eDObXPPO4EV6e48RP1ODVtwwHbTX1jeWRJaz17Hd/gnS9cN/gihCNN3ALwvSDYNaCHJn1y/E4dFxdXJanQUxmlxc8iqGo7x/mEuPT6yjaH2Eu/78+m5E46WYqj+8IEJA+sijaAAAAABJRU5ErkJggg==") 0 0, none;         }
+         canvas { width: 100%; height: calc(100vh - 40px); background: black; display: block; }
+         h1 { text-align: center; position: relative; }
+         #overlay { position: absolute; right: 10px; top: 0; height: 40px; display: flex; align-items: center; gap: 10px; }
+         #shadow {
+         position: fixed;
+         left: 0; top: 0;
+         width: 16px; height: 24px;
+         pointer-events: none; /* let clicks go through */
+         z-index: 9999;
+         background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAMAAAGzeb2oAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADJUExURYmJiQAAAH19fSQkJD4+PtXV1WNjY3x8fC4uLvLy8uzs7FtbW3t7e+3t7f///+rq6lxcXHp6euvr611dXXl5eS8vL15eXu7u7mhoaO/v7+np6ejo6NLS0j09PXV1dbm5uQQEBDk5OTc3NzY2NkpKShMTE6qqqmdnZwEBAeXl5ZiYmC0tLfHx8XZ2dmRkZKamptvb2x4eHtra2m5ubm9vb01NTfT09CgoKEtLSz8/P8PDw8jIyHBwcP39/dHR0RAQEDg4OHR0dAAAAGkfIhoAAABDdFJOU////////////////////////////////////////////////////////////////////////////////////////wBBYgTvAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGHRFWHRTb2Z0d2FyZQBQYWludC5ORVQgNS4xLjgbaeqoAAAAtmVYSWZJSSoACAAAAAUAGgEFAAEAAABKAAAAGwEFAAEAAABSAAAAKAEDAAEAAAADAAAAMQECABAAAABaAAAAaYcEAAEAAABqAAAAAAAAAKOTAADoAwAAo5MAAOgDAABQYWludC5ORVQgNS4xLjgAAwAAkAcABAAAADAyMzABoAMAAQAAAAEAAAAFoAQAAQAAAJQAAAAAAAAAAgABAAIABAAAAFI5OAACAAcABAAAADAxMDAAAAAAuh84Q/mMLokAAADaSURBVBhXVY/pUgIxEIQbRV2FbTBkUcT1WA9UWE+8737/h7ImmxSSH5OvvslUTwAh8ygqSKCwJWRdCQXp8SwKkkxb21mhsyJh/loKqyvWl5Cxtx2gIOl8hL3x/gGms/rm1lpdSb8GzYyEdoLNToSc/QQcJOAwgZHBaJyXBud5eDObXPPO4EV6e48RP1ODVtwwHbTX1jeWRJaz17Hd/gnS9cN/gihCNN3ALwvSDYNaCHJn1y/E4dFxdXJanQUxmlxc8iqGo7x/mEuPT6yjaH2Eu/78+m5E46WYqj+8IEJA+sijaAAAAABJRU5ErkJggg==") no-repeat;
+         }
+         .cursor {
+         position: fixed;
+         left: 0; top: 0;
+         width: 16px; height: 24px;
+         pointer-events: none;
+         z-index: 9999;
+         cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAYCAMAAAGzeb2oAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACKUExURYmJiQAAAH19fSQkJD4+Pv8AJmNjY3x8fC4uLltbW3t7e1xcXHp6el1dXXl5eS8vL15eXmhoaD09PXV1dQQEBDk5OTc3NzY2NkpKShMTE6qqqmdnZwEBAZiYmC0tLXZ2dmRkZKamph4eHm5ubm9vb01NTSgoKEtLSz8/P3BwcBAQEDg4OHR0dAAAADDsBPUAAAAudFJOU////////////////////////////////////////////////////////////wCCj3NVAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGHRFWHRTb2Z0d2FyZQBQYWludC5ORVQgNS4xLjgbaeqoAAAAtmVYSWZJSSoACAAAAAUAGgEFAAEAAABKAAAAGwEFAAEAAABSAAAAKAEDAAEAAAADAAAAMQECABAAAABaAAAAaYcEAAEAAABqAAAAAAAAAKOTAADoAwAAo5MAAOgDAABQYWludC5ORVQgNS4xLjgAAwAAkAcABAAAADAyMzABoAMAAQAAAAEAAAAFoAQAAQAAAJQAAAAAAAAAAgABAAIABAAAAFI5OAACAAcABAAAADAxMDAAAAAAuh84Q/mMLokAAAC9SURBVBhXXY+JUgIxEAUHpWUBycKK64GyCnji+//fs2aSVK2mUklXTzKHmaxJ1vYmGbGbhWQtJHsXMikifhCHv3I6fXayywuPS9bAdUALkCrAje0ZXiPBQtKPQ/4j2bQC8wosK7CqwLqCUwY6h0dPLGP3wsHhQ/LmosR57zApHdZlU65mf0QDzL23sYBlzBOijMIq/ROwDjUSsEkjsb3t7+77hyx2T/BcilvH8SS9wVDE5CvuAb6zyF4qVfULzY0qKefGo3oAAAAASUVORK5CYII=") 0 0, cross;
+         }
+      </style>
 </head>
 <body>
 <h1>Mouse mermory doom</h1>
